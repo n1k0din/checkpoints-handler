@@ -26,6 +26,7 @@ import logging
 import os
 import re
 import socketserver
+import threading
 from collections import namedtuple
 
 Datagram = namedtuple(
@@ -59,6 +60,10 @@ class CheckpointsHandler(socketserver.StreamRequestHandler):
                 print_datagram(datagram)
         else:
             dump_invalid_data(input)
+
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
 
 
 def is_datagram_valid(datagram_string):
@@ -123,12 +128,16 @@ def main():
     host = os.environ.get('HOST', '0.0.0.0')
 
     try:
-        with socketserver.TCPServer((host, port), CheckpointsHandler) as server:
+        with ThreadedTCPServer((host, port), CheckpointsHandler) as server:
             print(f'Server started at {host}:{port}')
             print('CTRL+C to stop server')
-            server.serve_forever()
+            server_thread = threading.Thread(target=server.serve_forever)
+            server_thread.daemon = True
+            server_thread.start()
+            server_thread.join()
     except KeyboardInterrupt:
         print('Server stopped')
+        server.shutdown()
         return
 
 
