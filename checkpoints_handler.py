@@ -45,19 +45,20 @@ Datagram = namedtuple(
 
 
 class CheckpointsHandler(socketserver.StreamRequestHandler):
-
     def handle(self):
-        while True:
-            input = self.rfile.readline().decode()
+        try:
+            input = self.rfile.readline().decode('ascii')
+        except UnicodeDecodeError as error:
+            logging.debug(error)
 
-            if is_datagram_valid(input):
-                datagram = datagram_parse(input)
-                dump_datagram(datagram)
+        if is_datagram_valid(input):
+            datagram = datagram_parse(input)
+            dump_datagram(datagram)
 
-                if filter_by_group(datagram, '00'):
-                    print_datagram(datagram)
-            else:
-                dump_invalid_data(input)
+            if filter_by_group(datagram):
+                print_datagram(datagram)
+        else:
+            dump_invalid_data(input)
 
 
 def is_datagram_valid(datagram_string):
@@ -104,11 +105,13 @@ def dump_invalid_data(invalid_string):
     logging.warning('INVALID %s', invalid_string.strip())
 
 
-def filter_by_group(datagram, group_number):
+def filter_by_group(datagram, group_number='00'):
     return datagram.group_number == group_number
 
 
 def main():
+    global _FINISH
+
     logfilename = 'competitors.log'
     logging.basicConfig(
         filename=logfilename,
@@ -116,11 +119,17 @@ def main():
         level=logging.INFO,
     )
 
-    port = int(os.environ.get('PORT', 8000))
-    host = os.environ.get('HOST', '')
+    port = int(os.environ.get('PORT', 9000))
+    host = os.environ.get('HOST', '0.0.0.0')
 
-    with socketserver.TCPServer((host, port), CheckpointsHandler) as server:
-        server.serve_forever()
+    try:
+        with socketserver.TCPServer((host, port), CheckpointsHandler) as server:
+            print(f'Server started at {host}:{port}')
+            print('CTRL+C to stop server')
+            server.serve_forever()
+    except KeyboardInterrupt:
+        print('Server stopped')
+        return
 
 
 if __name__ == '__main__':

@@ -1,0 +1,4 @@
+2021-08-16 15:31:26,668 WARNING:INVALID hello
+2021-08-16 15:31:28,890 WARNING:INVALID world
+2021-08-16 15:31:41,332 INFO:{"competitor_number": "0003", "channel_id": "G2", "hours": "01", "minutes": "13", "seconds": "03", "tenths": "8", "hundredths": "7", "thousandths": "7", "group_number": "01"}
+2021-08-16 15:31:47,307 INFO:{"competitor_number": "0002", "channel_id": "C1", "hours": "01", "minutes": "13", "seconds": "02", "tenths": "8", "hundredths": "7", "thousandths": "7", "group_number": "00"}
