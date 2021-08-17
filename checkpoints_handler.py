@@ -114,9 +114,7 @@ def filter_by_group(datagram, group_number='00'):
     return datagram.group_number == group_number
 
 
-def main():
-    global _FINISH
-
+def main():   
     logfilename = 'competitors.log'
     logging.basicConfig(
         filename=logfilename,
